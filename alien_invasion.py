@@ -35,7 +35,8 @@ class AlienInvasion:
 
         # 创建一个用于存储游戏统计信息的实例
         self.stats = GameStats(self)
-        # 创建存储游戏统计信息的实例，
+        # 创建存储游戏统计信息的实例，并创建记分牌
+        self.sb = Scoreboard(self)
 
         self.ship = Ship(self)
         # 创建用于存储子弹的编组
@@ -87,6 +88,9 @@ class AlienInvasion:
             self.settings.initialize_dynamic_settings()
             # 重置游戏的统计信息
             self.stats.reset_stats()
+            self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
             self.game_active = True
 
             # 清空外星人列表和子弹列表
@@ -146,11 +150,22 @@ class AlienInvasion:
         collisions = pygame.sprite.groupcollide(
             self.bullets, self.aliens, True, True
         )
+
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
+
         if not self.aliens:
             # 删除现有的子弹并创建一个新的外星舰队
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+
+            # 提升等级
+            self.stats.level += 1
+            self.sb.prep_level()
 
     def _update_aliens(self):
         """检查是否有外星人位于屏幕边缘，更新外星舰队中所有外星人的位置"""
@@ -172,6 +187,9 @@ class AlienInvasion:
             bullet.draw_bullet()
         self.ship.blitme()
         self.aliens.draw(self.screen)
+
+        # 显示得分
+        self.sb.show_score()
 
         # 如果游戏处于非活跃状态，就绘制Play按钮
         if not self.game_active:
@@ -230,6 +248,7 @@ class AlienInvasion:
         # 将ships_left减1
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             # 清空外星人列表和子弹列表
             self.aliens.empty()
