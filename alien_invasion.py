@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import Scoreboard
 from button import Button
 from ship import Ship
 from bullet import Bullet
@@ -34,6 +35,7 @@ class AlienInvasion:
 
         # 创建一个用于存储游戏统计信息的实例
         self.stats = GameStats(self)
+        # 创建存储游戏统计信息的实例，
 
         self.ship = Ship(self)
         # 创建用于存储子弹的编组
@@ -81,6 +83,8 @@ class AlienInvasion:
         """在玩家单击Play按钮时开始新游戏"""
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.game_active:
+            # 还原游戏设置
+            self.settings.initialize_dynamic_settings()
             # 重置游戏的统计信息
             self.stats.reset_stats()
             self.game_active = True
@@ -92,6 +96,9 @@ class AlienInvasion:
             # 创建一个新的外星舰队，并将飞船放在屏幕底部的中央
             self._create_fleet()
             self.ship.center_ship()
+
+            # 隐藏光标 光标位于游戏窗口内时将其隐藏起来
+            pygame.mouse.set_visible(False)
 
     def _check_keydown_events(self, event):
         """响应按下"""
@@ -143,6 +150,7 @@ class AlienInvasion:
             # 删除现有的子弹并创建一个新的外星舰队
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _update_aliens(self):
         """检查是否有外星人位于屏幕边缘，更新外星舰队中所有外星人的位置"""
@@ -234,6 +242,8 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.game_active = False
+            # 当游戏进入非活跃状态后，立刻让光标可见
+            pygame.mouse.set_visible(True)
 
 
 if __name__ == '__main__':

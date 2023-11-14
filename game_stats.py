@@ -3,6 +3,8 @@ class GameStats:
 
     def __init__(self, ai_game):
         """初始化统计信息"""
+        self.ships_left = None
+        self.score = None
         self.settings = ai_game.settings
         self.reset_stats()
 
@@ -10,3 +12,4 @@ class GameStats:
         """初始化在游戏运行期间可能变化的游戏信息"""
         # 剩下的飞船数量
         self.ships_left = self.settings.ship_limit
+        self.score = 0
